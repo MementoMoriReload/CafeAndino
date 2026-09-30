@@ -10,6 +10,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.duoc.cafeandino.ui.CartScreen
 import com.duoc.cafeandino.ui.CheckoutScreen
 import com.duoc.cafeandino.ui.ConfirmationScreen
 import com.duoc.cafeandino.ui.HomeScreen
@@ -37,6 +38,7 @@ fun AppNavHost(
                 onProductClick = { productId ->
                     navController.navigate(Routes.productDetail(productId))
                 },
+                onCartClick = { navController.navigate("carrito") },
                 onCheckoutClick = { navController.navigate(Routes.CHECKOUT) }
             )
         }
@@ -49,16 +51,30 @@ fun AppNavHost(
             val productId = backStackEntry.arguments?.getInt("productId") ?: 0
             val menuItems by homeViewModel.menuItems.collectAsState()
             val orderCount by cartViewModel.orderCount.collectAsState()
+            val product = menuItems.firstOrNull { it.id == productId }
 
             ProductDetailScreen(
-                product = menuItems.firstOrNull { it.id == productId },
+                product = product,
                 orderCount = orderCount,
-                onAdd = { cartViewModel.addOrder() },
+                onAdd = {
+                    if (product != null) {
+                        cartViewModel.addItem(product)
+                    }
+                },
                 onBack = { navController.popBackStack() }
             )
         }
 
-        // NODO 3: formulario de pedido
+        // NODO 3: carrito
+        composable(Routes.CART) {
+            CartScreen(
+                cartViewModel = cartViewModel,
+                onCheckoutClick = { navController.navigate(Routes.CHECKOUT) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // NODO 4: formulario de pedido
         composable(Routes.CHECKOUT) {
             val orderCount by cartViewModel.orderCount.collectAsState()
 
@@ -66,12 +82,11 @@ fun AppNavHost(
                 viewModel = checkoutViewModel,
                 itemCount = orderCount,
                 onOrderConfirmed = { customerName ->
-                    cartViewModel.confirmOrder(customerName)   // el carrito se vacía
-                    checkoutViewModel.reset()                  // el formulario se limpia
+                    cartViewModel.confirmOrder(customerName)
+                    checkoutViewModel.reset()
                     navController.navigate(
                         Routes.confirmation(Uri.encode(customerName))
                     ) {
-                        // saca el formulario de la pila: Atrás ya no vuelve a él
                         popUpTo(Routes.HOME)
                     }
                 },
@@ -79,7 +94,7 @@ fun AppNavHost(
             )
         }
 
-        // NODO 4: confirmación, que recibe el nombre por la ruta
+        // NODO 5: confirmación, que recibe el nombre por la ruta
         composable(
             route = Routes.CONFIRMATION,
             arguments = listOf(navArgument("customerName") { type = NavType.StringType })
