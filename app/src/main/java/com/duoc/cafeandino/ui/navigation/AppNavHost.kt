@@ -15,16 +15,19 @@ import com.duoc.cafeandino.ui.CheckoutScreen
 import com.duoc.cafeandino.ui.ConfirmationScreen
 import com.duoc.cafeandino.ui.HomeScreen
 import com.duoc.cafeandino.ui.ProductDetailScreen
+import com.duoc.cafeandino.ui.SettingsScreen
 import com.duoc.cafeandino.viewmodel.CartViewModel
 import com.duoc.cafeandino.viewmodel.CheckoutViewModel
 import com.duoc.cafeandino.viewmodel.HomeViewModel
+import com.duoc.cafeandino.viewmodel.SettingsViewModel
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     homeViewModel: HomeViewModel,
     cartViewModel: CartViewModel,
-    checkoutViewModel: CheckoutViewModel
+    checkoutViewModel: CheckoutViewModel,
+    settingsViewModel: SettingsViewModel
 ) {
     NavHost(
         navController = navController,
@@ -38,8 +41,9 @@ fun AppNavHost(
                 onProductClick = { productId ->
                     navController.navigate(Routes.productDetail(productId))
                 },
-                onCartClick = { navController.navigate("carrito") },
-                onCheckoutClick = { navController.navigate(Routes.CHECKOUT) }
+                onCartClick = { navController.navigate(Routes.CART) },
+                onCheckoutClick = { navController.navigate(Routes.CHECKOUT) },
+                onSettingsClick = { navController.navigate(Routes.SETTINGS) }
             )
         }
 
@@ -94,7 +98,15 @@ fun AppNavHost(
             )
         }
 
-        // NODO 5: confirmación, que recibe el nombre por la ruta
+        // NODO 5: ajustes
+        composable(Routes.SETTINGS) {
+            SettingsScreen(
+                settingsViewModel = settingsViewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // NODO 6: confirmación, que recibe el nombre por la ruta
         composable(
             route = Routes.CONFIRMATION,
             arguments = listOf(navArgument("customerName") { type = NavType.StringType })

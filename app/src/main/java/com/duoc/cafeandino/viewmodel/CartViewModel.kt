@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 
 class CartViewModel : ViewModel() {
 
-    private val _cartItems = MutableStateFlow(mutableListOf<CartItem>())
+    private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
     val cartItems: StateFlow<List<CartItem>> = _cartItems.asStateFlow()
 
     // Datos derivados: se recalculan solos cada vez que cambia el carrito
@@ -32,7 +32,7 @@ class CartViewModel : ViewModel() {
     fun addItem(menuItem: MenuItem) {
         val existing = _cartItems.value.firstOrNull { it.item.id == menuItem.id }
         if (existing == null) {
-            _cartItems.value.add(CartItem(menuItem, 1))
+            _cartItems.value= _cartItems.value + CartItem(menuItem, 1)
         } else {
             increaseQuantity(menuItem.id)
         }
@@ -47,7 +47,7 @@ class CartViewModel : ViewModel() {
     fun decreaseQuantity(itemId: Int) {
         _cartItems.value = _cartItems.value
             .map { if (it.item.id == itemId) it.copy(quantity = it.quantity - 1) else it }
-            .toMutableList()
+            .filter {it.quantity>0}
     }
 
     fun removeItem(itemId: Int) {
@@ -61,5 +61,6 @@ class CartViewModel : ViewModel() {
     /** Se llama cuando el formulario se confirmó correctamente. */
     fun confirmOrder(customerName: String) {
         _lastCustomerName.value = customerName
+        clearCart()
     }
 }
