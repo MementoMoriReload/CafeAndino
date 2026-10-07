@@ -28,7 +28,8 @@ fun HomeScreen(
     cartViewModel: CartViewModel,
     onProductClick: (Int) -> Unit,
     onCartClick: () -> Unit,
-    onCheckoutClick: () -> Unit
+    onCheckoutClick: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     val menuItems by homeViewModel.menuItems.collectAsState()
     val orderCount by cartViewModel.orderCount.collectAsState()
@@ -41,7 +42,8 @@ fun HomeScreen(
         onAdd = { menuItem -> cartViewModel.addItem(menuItem) },
         onProductClick = onProductClick,
         onCartClick = onCartClick,
-        onCheckoutClick = onCheckoutClick
+        onCheckoutClick = onCheckoutClick,
+        onSettingsClick = onSettingsClick
     )
 }
 
@@ -54,10 +56,18 @@ fun HomeScreenContent(
     onAdd: (MenuItem) -> Unit,
     onProductClick: (Int) -> Unit,
     onCartClick: () -> Unit,
-    onCheckoutClick: () -> Unit
+    onCheckoutClick: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Café Andino") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text("Café Andino") },
+                actions = {
+                    TextButton(onClick = onSettingsClick) { Text("Ajustes") }
+                }
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -157,6 +167,7 @@ fun HomeScreenPreview() {
         onAdd = {},
         onProductClick = {},
         onCartClick = {},
-        onCheckoutClick = {}
+        onCheckoutClick = {},
+        onSettingsClick = {}
     )
 }
